@@ -5,6 +5,10 @@
 //  Created by Azizbek Asadov on 07/01/23.
 //
 
+
+#if canImport(UIKit)
+import UIKit
+
 extension CALayer {
     /// `applyFigmaShadow` used for the application of the shadows of the same style as it could be done in Figma;
     /// Better invoke this method in `layoutSubviews`, since the `shadowPath` is drawn with bounds value that is set in this method
@@ -29,3 +33,4 @@ extension CALayer {
         }
     }
 }
+#endif

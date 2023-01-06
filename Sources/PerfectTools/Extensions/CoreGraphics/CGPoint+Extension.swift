@@ -5,6 +5,9 @@
 //  Created by Azizbek Asadov on 07/01/23.
 //
 
+#if canImport(UIKit)
+import UIKit
+
 extension CGPoint {
     public func substract(point: CGPoint) -> CGPoint {
         return .init(x: x - point.x, y: y - point.y)
@@ -22,3 +25,4 @@ extension CGPoint {
         return .init(x: x, y: y + yOffset)
     }
 }
+#endif
