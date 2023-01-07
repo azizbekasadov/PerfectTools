@@ -5,6 +5,53 @@
 //  Created by Azizbek Asadov on 07/01/23.
 //
 
+#if canImport(UIKit)
+import UIKit.UIImage
+
+extension String {
+    public var image: UIImage {
+        guard let image = UIImage(named: self) else {
+            fatalError("Нет картинки для \(self)")
+        }
+
+        return image
+    }
+
+    public var base64Encoded: String {
+        return Data(self.utf8).base64EncodedString()
+    }
+}
+
+extension String {
+    /// Достаёт метадату картинки в которой можно узнать её размеры не загружая её
+    public func getImageSizeFromURL(completion: @escaping (CGSize?) -> Void) {
+        DispatchQueue.global(qos: .background).async {
+            guard let imageURL = URL(string: self),
+                  let source = CGImageSourceCreateWithURL(imageURL as CFURL, nil),
+                  let imageHeader = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) else { completion(nil); return }
+            let imageHeaderDictionary = imageHeader as NSDictionary
+            guard let width = imageHeaderDictionary["PixelWidth"] as? CGFloat,
+                  let height = imageHeaderDictionary["PixelHeight"] as? CGFloat else { completion(nil); return }
+
+            DispatchQueue.main.async {
+                completion(CGSize(width: width, height: height))
+            }
+        }
+    }
+}
+
+extension String {
+    public var attributed: NSAttributedString {
+        return NSAttributedString(string: self)
+    }
+
+    public var underlined: NSAttributedString {
+        return NSAttributedString(string: self, attributes: [.underlineStyle: NSUnderlineStyle.single.rawValue])
+    }
+}
+
+#endif
+
 extension String {
     /// Разделяет строку содержащую имя и фамилию на две части до первого пробела и после
     public func splitName() -> (firstName: String?, lastName: String?) {
@@ -87,48 +134,6 @@ extension String {
             print("Can't parse string to ISO8601.")
             return nil
         }
-    }
-}
-
-extension String {
-    /// Достаёт метадату картинки в которой можно узнать её размеры не загружая её
-    public func getImageSizeFromURL(completion: @escaping (CGSize?) -> Void) {
-        DispatchQueue.global(qos: .background).async {
-            guard let imageURL = URL(string: self),
-                  let source = CGImageSourceCreateWithURL(imageURL as CFURL, nil),
-                  let imageHeader = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) else { completion(nil); return }
-            let imageHeaderDictionary = imageHeader as NSDictionary
-            guard let width = imageHeaderDictionary["PixelWidth"] as? CGFloat,
-                  let height = imageHeaderDictionary["PixelHeight"] as? CGFloat else { completion(nil); return }
-
-            DispatchQueue.main.async {
-                completion(CGSize(width: width, height: height))
-            }
-        }
-    }
-}
-
-extension String {
-    public var attributed: NSAttributedString {
-        return NSAttributedString(string: self)
-    }
-
-    public var underlined: NSAttributedString {
-        return NSAttributedString(string: self, attributes: [.underlineStyle: NSUnderlineStyle.single.rawValue])
-    }
-}
-
-extension String {
-    public var image: UIImage {
-        guard let image = UIImage(named: self) else {
-            fatalError("Нет картинки для \(self)")
-        }
-
-        return image
-    }
-
-    public var base64Encoded: String {
-        return Data(self.utf8).base64EncodedString()
     }
 }
 

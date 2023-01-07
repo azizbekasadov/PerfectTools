@@ -10,6 +10,8 @@
 
 #if os(watchOS)
 import WatchKit
+#elseif os(iOS)
+import UIKit
 #endif
 
 // MARK: - Device
@@ -504,6 +506,7 @@ public enum Device {
         default: return unknown(identifier)
         }
 #endif
+        return unknown(identifier)
     }
 
     /// Get the real device from a device.
@@ -709,7 +712,8 @@ public enum Device {
 #elseif os(tvOS)
         return (width: -1, height: -1)
 #endif
-    }
+        return (width: 0, height: 0)
+}
 
 #if os(iOS)
     /// All iPods
@@ -789,23 +793,6 @@ public enum Device {
         return isOneOf(Device.allPods) || isOneOf(Device.allSimulatorPods)
     }
 
-    #if canImport(UIKit)
-    /// Returns whether the device is an iPhone (real or simulator)
-    public var isPhone: Bool {
-        return (isOneOf(Device.allPhones)
-                || isOneOf(Device.allSimulatorPhones)
-                || (UIDevice.current.userInterfaceIdiom == .phone && isCurrent)) && !isPod
-    }
-
-    /// Returns whether the device is an iPad (real or simulator)
-    public var isPad: Bool {
-        return isOneOf(Device.allPads)
-        || isOneOf(Device.allSimulatorPads)
-        || (UIDevice.current.userInterfaceIdiom == .pad && isCurrent)
-    }
-    
-    #endif
-
     /// Returns whether the device is any of the simulator
     /// Useful when there is a need to check and skip running a portion of code (location request or others)
     public var isSimulator: Bool {
@@ -817,19 +804,6 @@ public enum Device {
     public var realDevice: Device {
         return Device.realDevice(from: self)
     }
-
-    #if canImport(UIKit)
-    public var isZoomed: Bool? {
-        guard isCurrent else { return nil }
-        if Int(UIScreen.main.scale.rounded()) == 3 {
-            // Plus-sized
-            return UIScreen.main.nativeScale > 2.7 && UIScreen.main.nativeScale < 3
-        } else {
-            return UIScreen.main.nativeScale > UIScreen.main.scale
-        }
-    }
-    #endif
-
     /// All Touch ID Capable Devices
     public static var allTouchIDCapableDevices: [Device] {
         return [.iPhone5s, .iPhone6, .iPhone6Plus, .iPhone6s, .iPhone6sPlus, .iPhone7, .iPhone7Plus, .iPhoneSE, .iPhone8, .iPhone8Plus, .iPhoneSE2, .iPadAir2, .iPad5, .iPad6, .iPadAir3, .iPad7, .iPad8, .iPad9, .iPadAir4, .iPadMini3, .iPadMini4, .iPadMini5, .iPadMini6, .iPadPro9Inch, .iPadPro12Inch, .iPadPro12Inch2, .iPadPro10Inch]
@@ -955,6 +929,7 @@ public enum Device {
         #elseif os(watchOS)
         return allWatches
         #endif
+        return []
     }
 
     /// All simulators
@@ -999,56 +974,6 @@ public enum Device {
     /// Whether or not the current device is the current device.
     private var isCurrent: Bool {
         return self == Device.current
-    }
-
-    /// The name identifying the device (e.g. "Dennis' iPhone").
-    public var name: String? {
-        guard isCurrent else { return nil }
-        #if os(watchOS)
-        return WKInterfaceDevice.current().name
-        #elseif canImport(UIKit)
-        return UIDevice.current.name
-        #endif
-    }
-
-    /// The name of the operating system running on the device represented by the receiver (e.g. "iOS" or "tvOS").
-    public var systemName: String? {
-        guard isCurrent else { return nil }
-        #if os(watchOS)
-        return WKInterfaceDevice.current().systemName
-        #elseif canImport(UIKit)
-        return UIDevice.current.systemName
-        #endif
-    }
-
-    /// The current version of the operating system (e.g. 8.4 or 9.2).
-    public var systemVersion: String? {
-        guard isCurrent else { return nil }
-        #if os(watchOS)
-        return WKInterfaceDevice.current().systemVersion
-        #elseif canImport(UIKit)
-        return UIDevice.current.systemVersion
-        #endif
-    }
-
-    /// The model of the device (e.g. "iPhone" or "iPod Touch").
-    public var model: String? {
-        guard isCurrent else { return nil }
-        #if os(watchOS)
-        return WKInterfaceDevice.current().model
-        #elseif canImport(UIKit)
-        return UIDevice.current.model
-        #endif
-    }
-
-    /// The model of the device as a localized string.
-    public var localizedModel: String? {
-        guard isCurrent else { return nil }
-        #if os(watchOS)
-        return WKInterfaceDevice.current().localizedModel
-        #elseif canImport(UIKit)
-        return UIDevice.current.localizedModel
-        #endif
     }
 
     /// PPI (Pixels per Inch) on the current device's screen (if applicable). When the device is not applicable this property returns nil.
@@ -1144,28 +1069,7 @@ public enum Device {
         #elseif os(tvOS)
         return nil
         #endif
-    }
-
-    /// True when a Guided Access session is currently active; otherwise, false.
-    public var isGuidedAccessSessionActive: Bool {
-        #if os(iOS)
-        #if swift(>=4.2)
-        return UIAccessibility.isGuidedAccessEnabled
-        #else
-        return UIAccessibilityIsGuidedAccessEnabled()
-        #endif
-        #else
-        return false
-        #endif
-    }
-
-    /// The brightness level of the screen.
-    public var screenBrightness: Int {
-        #if os(iOS) && canImport(UIKit)
-        return Int(UIScreen.main.brightness * 100)
-        #else
-        return 100
-        #endif
+        return nil
     }
 }
 
@@ -1270,6 +1174,7 @@ extension Device: CustomStringConvertible {
         case .unknown(let identifier): return identifier
         }
         #endif
+        return ""
     }
 
     /// A safe version of `description`.
@@ -1374,6 +1279,7 @@ extension Device: CustomStringConvertible {
         case .unknown(let identifier): return identifier
         }
         #endif
+        return ""
     }
 }
 
@@ -1780,9 +1686,22 @@ extension Device {
 }
 #endif
 
-// MARK: - Custom
-
+#if canImport(UIKit)
 extension Device {
+    public static let width = UIScreen.main.bounds.size.width
+    public static let height = UIScreen.main.bounds.size.height
+    public static let hasSafeArea = Device.safeAreaInsets.bottom > 0
+    public static let isPad = Device.current.realDevice.isOneOf(allPads)
+    public static var safeAreaInsets: UIEdgeInsets {
+        return .zero
+//        return Navigation.keyWindow?.safeAreaInsets ?? .zero
+    }
+    public static var statusBarHeight: CGFloat {
+        let window = UIApplication.shared.windows.first { $0.isKeyWindow }
+        return window?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
+    }
+    public static var colorMode: UIUserInterfaceStyle { return UIScreen.main.traitCollection.userInterfaceStyle }
+    
     public static var allNarrowScreens: [Device] {
         return [
             .iPodTouch5,
@@ -1800,42 +1719,109 @@ extension Device {
         return isOneOf(Device.allNarrowScreens)
     }
 }
-
-#if canImport(UIKit)
-extension Device {
-    public static let width = UIScreen.main.bounds.size.width
-    public static let height = UIScreen.main.bounds.size.height
-    public static let hasSafeArea = Device.safeAreaInsets.bottom > 0
-    public static let isPad = Device.current.realDevice.isOneOf(allPads)
-    public static var safeAreaInsets: UIEdgeInsets {
-        return .zero
-//        return Navigation.keyWindow?.safeAreaInsets ?? .zero
-    }
-    public static var statusBarHeight: CGFloat {
-        let window = UIApplication.shared.windows.first { $0.isKeyWindow }
-        return window?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
-    }
-    public static var colorMode: UIUserInterfaceStyle { return UIScreen.main.traitCollection.userInterfaceStyle }
-}
 #endif
 
+#if canImport(UIKit)
+import UIKit
 extension Device {
-//    public static var isJailBroken: Bool {
-////        if UserManager.current.isIgnoringJailbreak {
-////            return false
-////        }
-//
-//        let jb = IOSSecuritySuite.amIJailbrokenWithFailMessage()
-//        if jb.jailbroken {
-//
-////            AnalyticsService.sendJailbroken(reason: jb.failMessage)
-//        }
-//        //        return jb.jailbroken
-//        return false
-//    }
-
     public var osNameVersion: String {
         return "\(systemName ?? "unknown OS") \(systemVersion ?? "0")"
     }
+    /// Returns whether the device is an iPhone (real or simulator)
+    public var isPhone: Bool {
+        return (isOneOf(Device.allPhones)
+                || isOneOf(Device.allSimulatorPhones)
+                || (UIDevice.current.userInterfaceIdiom == .phone && isCurrent)) && !isPod
+    }
+    
+    /// Returns whether the device is an iPad (real or simulator)
+    public var isPad: Bool {
+        return isOneOf(Device.allPads)
+        || isOneOf(Device.allSimulatorPads)
+        || (UIDevice.current.userInterfaceIdiom == .pad && isCurrent)
+    }
+    
+    public var isZoomed: Bool? {
+        guard isCurrent else { return nil }
+        if Int(UIScreen.main.scale.rounded()) == 3 {
+            // Plus-sized
+            return UIScreen.main.nativeScale > 2.7 && UIScreen.main.nativeScale < 3
+        } else {
+            return UIScreen.main.nativeScale > UIScreen.main.scale
+        }
+    }
+    
+    /// The name identifying the device (e.g. "Dennis' iPhone").
+    public var name: String? {
+        guard isCurrent else { return nil }
+        #if os(watchOS)
+        return WKInterfaceDevice.current().name
+        #else
+        return UIDevice.current.name
+        #endif
+    }
+    
+    /// The name of the operating system running on the device represented by the receiver (e.g. "iOS" or "tvOS").
+    public var systemName: String? {
+        guard isCurrent else { return nil }
+        #if os(watchOS)
+        return WKInterfaceDevice.current().systemName
+        #elseif canImport(UIKit)
+        return UIDevice.current.systemName
+        #endif
+    }
+
+    /// The current version of the operating system (e.g. 8.4 or 9.2).
+    public var systemVersion: String? {
+        guard isCurrent else { return nil }
+        #if os(watchOS)
+        return WKInterfaceDevice.current().systemVersion
+        #elseif canImport(UIKit)
+        return UIDevice.current.systemVersion
+        #endif
+    }
+
+    /// The model of the device (e.g. "iPhone" or "iPod Touch").
+    public var model: String? {
+        guard isCurrent else { return nil }
+        #if os(watchOS)
+        return WKInterfaceDevice.current().model
+        #elseif canImport(UIKit)
+        return UIDevice.current.model
+        #endif
+    }
+
+    /// The model of the device as a localized string.
+    public var localizedModel: String? {
+        guard isCurrent else { return nil }
+        #if os(watchOS)
+        return WKInterfaceDevice.current().localizedModel
+        #elseif canImport(UIKit)
+        return UIDevice.current.localizedModel
+        #endif
+    }
+    
+    /// True when a Guided Access session is currently active; otherwise, false.
+    public var isGuidedAccessSessionActive: Bool {
+        #if os(iOS)
+        #if swift(>=4.2)
+        return UIAccessibility.isGuidedAccessEnabled
+        #else
+        return UIAccessibilityIsGuidedAccessEnabled()
+        #endif
+        #else
+        return false
+        #endif
+    }
+
+    /// The brightness level of the screen.
+    public var screenBrightness: Int {
+        #if os(iOS) && canImport(UIKit)
+        return Int(UIScreen.main.brightness * 100)
+        #else
+        return 100
+        #endif
+    }
 }
 
+#endif

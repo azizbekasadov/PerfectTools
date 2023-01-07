@@ -5,11 +5,15 @@
 //  Created by Azizbek Asadov on 07/01/23.
 //
 
+
+#if canImport(UIKit)
+import UIKit
+
 extension NSAttributedString {
     // Вероятно boundingRect: - работает не идеально. Не отнимает lineSpacing последней строки.
     public func height(withConstrainedWidth width: CGFloat) -> CGFloat {
         let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
-        let boundingBox = boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, context: nil)
+        let boundingBox = self.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, context: nil)
 
         return ceil(boundingBox.height)
     }
@@ -23,3 +27,4 @@ extension NSAttributedString {
         return self.attributes(at: 0, effectiveRange: &range)
     }
 }
+#endif

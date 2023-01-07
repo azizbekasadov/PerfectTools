@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Bool + Extension.swift
 //  
 //
 //  Created by Azizbek Asadov on 07/01/23.
