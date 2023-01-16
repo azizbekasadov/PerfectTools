@@ -297,7 +297,3 @@ extension String {
         return "\u{200E}"
     }
 }
-
-extension String {
-    public static let currencyRuble = "₽"
-}
