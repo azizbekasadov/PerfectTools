@@ -21,7 +21,7 @@ public protocol Clickable {
     func handleLongPress(sender: UILongPressGestureRecognizer)
 }
 
-public extension UIView: Clickable {
+extension UIView: Clickable {
     
     private static var _tapAction = [String:(() -> Void)]()
     private static var _longPressAction = [String:(() -> Void)]()
@@ -30,7 +30,7 @@ public extension UIView: Clickable {
     private static var tapActionObjectHandle: UInt8 = 0
     private static var longPressActionObjectHandle: UInt8 = 1
     
-    var tapAction: () -> Void {
+    public var tapAction: () -> Void {
         get {
             return objc_getAssociatedObject(self, &UIView.tapActionObjectHandle) as! (() -> Void)
         }
@@ -38,7 +38,8 @@ public extension UIView: Clickable {
             objc_setAssociatedObject(self, &UIView.tapActionObjectHandle, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
-    var longPressAction: () -> Void {
+    
+    public var longPressAction: () -> Void {
         get {
             return objc_getAssociatedObject(self, &UIView.longPressActionObjectHandle) as! (() -> Void)
         }
@@ -48,19 +49,19 @@ public extension UIView: Clickable {
     }
     
     /// Handle tap
-    @objc func handleTap(sender: UITapGestureRecognizer) {
+    @objc public func handleTap(sender: UITapGestureRecognizer) {
         self.tapAction()
     }
     
     /// Handle long press
-    @objc func handleLongPress(sender: UILongPressGestureRecognizer) {
+    @objc public func handleLongPress(sender: UILongPressGestureRecognizer) {
         if sender.state == UIGestureRecognizer.State.began {
             self.longPressAction()
         }
     }
     
     /// Tap gesture
-    func addTapGesture(tapAction: @escaping () -> Void) {
+    public func addTapGesture(tapAction: @escaping () -> Void) {
         let tap = UITapGestureRecognizer(target: self , action: #selector(self.handleTap(sender:)))
         self.tapAction = tapAction
         tap.numberOfTapsRequired = 1
@@ -69,7 +70,7 @@ public extension UIView: Clickable {
     }
     
     /// Long press
-    func addLongPressGesture(duration: Double = 0.5, longPressAction: @escaping () -> Void) {
+    public func addLongPressGesture(duration: Double = 0.5, longPressAction: @escaping () -> Void) {
         let longPress = UILongPressGestureRecognizer(target: self , action: #selector(self.handleLongPress(sender:)))
         self.longPressAction = longPressAction
         longPress.minimumPressDuration = duration
