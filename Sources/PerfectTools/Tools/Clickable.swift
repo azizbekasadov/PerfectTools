@@ -11,15 +11,14 @@ import ObjectiveC
 #if canImport(UIKit)
 import UIKit
 
-@objc
 public protocol Clickable {
     var tapAction: () -> Void { get set }
     var longPressAction: () -> Void { get set }
     
-    optional func addTapGesture(tapAction: @escaping () -> Void) -> Void
-    optional func addLongPressGesture(duration: Double, longPressAction: @escaping () -> Void) -> Void
-    optional func handleTap(sender: UITapGestureRecognizer) -> Void
-    optional func handleLongPress(sender: UILongPressGestureRecognizer)
+    func addTapGesture(tapAction: @escaping () -> Void) -> Void
+    func addLongPressGesture(duration: Double, longPressAction: @escaping () -> Void) -> Void
+    func handleTap(sender: UITapGestureRecognizer) -> Void
+    func handleLongPress(sender: UILongPressGestureRecognizer)
 }
 
 public extension UIView: Clickable {
