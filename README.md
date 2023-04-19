@@ -11,7 +11,7 @@ All provides **native** tools for iOS & WatchOS programs
 Select `Xcode`>`File`> `Swift Packages`>`Add Package Dependency...`  
 and add `https://github.com/azizbekasadov/PerfectTools`.
 
-*The Swift Package Manager (SPM) is now the official way to install `PerfectTools`. The other package managers are now deprecated as of `4.8.0` and won't be supported in future versions.*
+*The Swift Package Manager (SPM) is now the official way to install `PerfectTools`. The other package managers are now deprecated as of `0.0.1` and won't be supported in future versions.*
 
 ### 📖 Documentation
 Look through the codebase in the framework. The documentation is still in-progress.
